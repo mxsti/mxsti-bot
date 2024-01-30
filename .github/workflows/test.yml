@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-  steps:
-  - name: Echo Test
-    run: echo Test
+    steps:
+    - name: Echo Test
+      run: echo Test
 
