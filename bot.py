@@ -1,8 +1,9 @@
+""" os needed to grab env variables """
+import os
 import discord
 from discord.ext import commands
-from reddit import get_post
 from dotenv import load_dotenv
-import os
+from reddit import get_post
 
 # env variables
 load_dotenv()
@@ -14,17 +15,30 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix='.', intents=intents)
 
+
 @bot.event
 async def on_ready():
+    """
+    Logs when the bot has started successfully
+    """
     print(f'Bot ready as {bot.user} - ID: {bot.user.id}')
 
 @bot.command()
 async def rreddit(ctx, subredditname: str):
-    """Gets random Post from given subreddit"""
+    """
+    User command - Posts a random post from given subreddit
+    
+    Parameters:
+        ctx (any): Context of the Command (User, Channel ...)
+        subredditname (str): Name of the subreddit
+        
+    Returns:
+        nothing - posts in the channel the command was posted
+    """
     try:
         post = get_post(subredditname)
-    except:
-        await ctx.send("Subreddit unbekannt")     
+    finally:
+        await ctx.send("Subreddit unbekannt")
     await ctx.send(post)
 
 
