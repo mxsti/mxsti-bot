@@ -1,15 +1,17 @@
-name: test-workflow
+name: Test
 
-on:
-  workflow_run:
-    workflows: [Pylint]
-    types:
-      - completed
+on: [push]
 
 jobs:
-  test:
+  run_script:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     steps:
-    - name: Echo Test
-      run: echo Test
-
+      - name: run test script
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: ./test.sh
