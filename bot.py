@@ -38,7 +38,7 @@ async def rreddit(ctx, subredditname: str):
     """
     try:
         post = get_post(subredditname)
-    except CommandInvokeError:
+    except:
         await ctx.send("Subreddit unbekannt!")
     await ctx.send(post)
 
