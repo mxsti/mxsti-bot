@@ -2,7 +2,7 @@
 import os
 import random
 import praw
-from praw.models.listing.generator import ListingGenerator
+from praw.models import Subreddit
 # get env variables
 from dotenv import load_dotenv
 load_dotenv()
@@ -17,34 +17,37 @@ reddit = praw.Reddit(
     user_agent=USER_AGENT
 )
 
+
 def get_post(subredditname):
     """
     Returns random hot post from given subreddit using the reddit api
-    
+
     Parameters:
         subredditname: Name of the subreddit
-        
+
     Returns:
         post url: the URL of a random post    
     """
-    posts: ListingGenerator = reddit.subreddit(subredditname).hot(limit=10)
-    if posts.yielded == 0:
-        raise SubredditNotFoundOrEmptyError(subredditname)
+    subreddit: Subreddit = reddit.subreddit(subredditname)
+    posts = []
+    try:
+        for post in subreddit.hot(limit=10):
+            posts.append(post.url)
+    except Exception as e:
+        raise SubredditNotFoundOrEmptyError(subredditname) from e
 
-    posts_urls = []
-    for post in posts:
-        posts_urls.append(post.url)
+    return random.choice(posts)
 
-    return random.choice(posts_urls)
 
 class SubredditNotFoundOrEmptyError(Exception):
     """
     Custom Exception when a Subreddit is empty or it does not exist
-    
+
     Attributes:
         subredditname: name of the not existing subreddit
         message: explanation of the error
     """
+
     def __init__(self, subredditname, message="Subreddit not found or empty"):
         self.subredditname = subredditname
         self.message = message
