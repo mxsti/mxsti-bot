@@ -39,7 +39,7 @@ async def rreddit(ctx, subredditname: str):
     try:
         post = get_post(subredditname)
     except CommandInvokeError:
-        await ctx.send("Subreddit unbekannt")
+        await ctx.send("Subreddit unbekannt!")
     await ctx.send(post)
 
 # start the bot
