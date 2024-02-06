@@ -2,9 +2,8 @@
 import os
 import discord
 from discord.ext import commands
-from discord.ext.commands.errors import CommandInvokeError
 from dotenv import load_dotenv
-from reddit import get_post
+from reddit import get_post, SubredditNotFoundOrEmptyError
 
 # env variables
 load_dotenv()
@@ -30,7 +29,7 @@ async def rreddit(ctx, subredditname: str):
     User command - Posts a random post from given subreddit
     
     Parameters:
-        ctx (any): Context of the Command (User, Channel ...)
+        ctx: Context of the Command (User, Channel ...)
         subredditname (str): Name of the subreddit
         
     Returns:
@@ -38,9 +37,10 @@ async def rreddit(ctx, subredditname: str):
     """
     try:
         post = get_post(subredditname)
-    except:
-        await ctx.send("Subreddit unbekannt!")
-    await ctx.send(post)
+        await ctx.send(post)
+    except SubredditNotFoundOrEmptyError as e:
+        print(f"Error grabbing posts: {e.subredditname} - {e.message}")
+        await ctx.send(f"Subreddit {subredditname} unbekannt!")
 
 # start the bot
 bot.run(bot_token)
