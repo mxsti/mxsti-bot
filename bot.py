@@ -23,15 +23,16 @@ async def on_ready():
     """
     print(f'Bot ready as {bot.user} - ID: {bot.user.id}')
 
+
 @bot.command()
 async def rreddit(ctx, subredditname: str):
     """
     User command - Posts a random post from given subreddit
-    
+
     Parameters:
         ctx: Context of the Command (User, Channel ...)
         subredditname (str): Name of the subreddit
-        
+
     Returns:
         nothing - posts in the channel the command was posted
     """
