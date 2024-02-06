@@ -22,4 +22,18 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: mxsti/discord-bot:tagname
+          tags: mxsti/discord-bot:latest
+
+  deployment:
+    needs: docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Run Deployment Script
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: ./deploy_discord_bot.sh
