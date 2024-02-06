@@ -8,7 +8,7 @@ load_dotenv()
 
 CLIENT_ID = os.environ.get("REDDIT_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("REDDIT_CLIENT_SECRET")
-USER_AGENT = "macos:discordbot:1.0 (by u/Impossible-Gain-4097)"
+USER_AGENT = os.environ.get("REDDIT_USER_AGENT")
 
 reddit = praw.Reddit(
     client_id=CLIENT_ID,
