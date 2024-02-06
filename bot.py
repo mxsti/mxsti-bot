@@ -2,6 +2,7 @@
 import os
 import discord
 from discord.ext import commands
+from discord.ext.commands.errors import CommandInvokeError
 from dotenv import load_dotenv
 from reddit import get_post
 
@@ -37,9 +38,9 @@ async def rreddit(ctx, subredditname: str):
     """
     try:
         post = get_post(subredditname)
-    finally:
+    except CommandInvokeError:
         await ctx.send("Subreddit unbekannt")
     await ctx.send(post)
 
-
+# start the bot
 bot.run(bot_token)
