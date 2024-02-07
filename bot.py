@@ -1,5 +1,6 @@
 """ os needed to grab env variables """
 import os
+import logging
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -8,6 +9,9 @@ from reddit import get_post, SubredditNotFoundOrEmptyError
 # env variables
 load_dotenv()
 bot_token = os.environ.get("BOT_TOKEN")
+
+# set up logging
+handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='a')
 
 # set up bot
 intents = discord.Intents.default()
@@ -44,4 +48,4 @@ async def rreddit(ctx, subredditname: str):
         await ctx.send(f"Subreddit {subredditname} unbekannt!")
 
 # start the bot
-bot.run(bot_token)
+bot.run(bot_token, log_handler=handler)
