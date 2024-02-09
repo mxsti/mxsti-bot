@@ -1,10 +1,12 @@
-"""os needed to grab env variables"""
+""" reddit helper functions to interact with reddit api via praw"""
+
 import os
 import random
 import praw
 from praw.models import Subreddit
-# get env variables
 from dotenv import load_dotenv
+from utils.exceptions import SubredditNotFoundOrEmptyError
+
 load_dotenv()
 
 CLIENT_ID = os.environ.get("REDDIT_CLIENT_ID")
@@ -37,18 +39,3 @@ def get_post(subredditname):
         raise SubredditNotFoundOrEmptyError(subredditname) from e
 
     return random.choice(posts)
-
-
-class SubredditNotFoundOrEmptyError(Exception):
-    """
-    Custom Exception when a Subreddit is empty or it does not exist
-
-    Attributes:
-        subredditname: name of the not existing subreddit
-        message: explanation of the error
-    """
-
-    def __init__(self, subredditname, message="Subreddit not found or empty"):
-        self.subredditname = subredditname
-        self.message = message
-        super().__init__(self.message)

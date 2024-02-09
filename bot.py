@@ -1,17 +1,19 @@
-""" os needed to grab env variables """
+""" discord bot file defining the setup and all commands/tasks of the bot """
+
 import os
 import logging
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-from reddit import get_post, SubredditNotFoundOrEmptyError
+from utils.reddit import get_post, SubredditNotFoundOrEmptyError
 
 # env variables
 load_dotenv()
 bot_token = os.environ.get("BOT_TOKEN")
 
 # set up logging
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='a')
+handler = logging.FileHandler(
+    filename='discord.log', encoding='utf-8', mode='a')
 
 # set up bot
 intents = discord.Intents.default()
@@ -28,6 +30,9 @@ async def on_ready():
     print(f'Bot ready as {bot.user} - ID: {bot.user.id}')
 
 
+##########
+# REDDIT #
+##########
 @bot.command()
 async def rreddit(ctx, subredditname: str):
     """
