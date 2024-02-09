@@ -1,4 +1,4 @@
-""" discord bot file defining the setup and all commands/tasks of the bot """
+# """ discord bot file defining the setup and all commands/tasks of the bot """
 
 import os
 import logging
