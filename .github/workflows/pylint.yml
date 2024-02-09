@@ -6,6 +6,7 @@ on:
 
 jobs:
   linting:
+    name: linting python code
     runs-on: ubuntu-latest
     strategy:
       matrix:
