@@ -3,7 +3,7 @@ name: Build, Push & Deploy Docker Image
 on:
   push:
     branches:
-      - "release"
+      - "release/*"
 
 jobs:
   docker_build_and_push:
