@@ -1,4 +1,4 @@
-name: Pylint
+name: Perform Quality Checks on main PR
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   linting:
-    name: linting python code
+    name: Code Linting
     runs-on: ubuntu-latest
     strategy:
       matrix:
