@@ -3,3 +3,4 @@ bot-env
 __pycache__
 venv
 discord.log
+*.db

@@ -2,10 +2,12 @@
 
 import os
 import logging
+from sqlite3 import Error
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 from utils.reddit import get_post, SubredditNotFoundOrEmptyError
+from utils.database import addreminder_db
 
 # env variables
 load_dotenv()
@@ -51,6 +53,30 @@ async def rreddit(ctx, subredditname: str):
     except SubredditNotFoundOrEmptyError as e:
         print(f"Error grabbing posts: {e.subredditname} - {e.message}")
         await ctx.send(f"Subreddit {subredditname} unbekannt!")
+
+
+############
+# REMINDER #
+############
+@bot.command()
+async def addreminder(ctx, topic, date):
+    """
+    User command - Adds a new reminder to the db
+
+    Parameters:
+        ctx: Context of the Command (User, Channel ...)
+        topic: topic of the reminder (e.g. Birthday Frank)
+        date: when to remind the user (Format: )
+
+    Returns:
+        nothing - posts in the channel the command was posted (success or error)
+    """
+    resp = addreminder_db(topic, date)
+    if isinstance(resp, Error):  # sqlite Error
+        await ctx.send("Das hat nicht geklappt :(")
+    else:
+        await ctx.send(f"{topic} erfolgreich eingefügt")
+
 
 # start the bot
 bot.run(bot_token, log_handler=handler)
