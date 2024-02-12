@@ -1,4 +1,4 @@
-name: Pylint
+name: Lint Code on PR
 
 on:
   pull_request:
@@ -6,7 +6,6 @@ on:
 
 jobs:
   linting:
-    name: linting python code
     runs-on: ubuntu-latest
     strategy:
       matrix:

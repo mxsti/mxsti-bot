@@ -1,4 +1,4 @@
-""" reddit helper functions to interact with reddit api via praw"""
+""" reddit helper functions to interact with reddit api via praw """
 
 import os
 import random
