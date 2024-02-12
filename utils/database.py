@@ -33,6 +33,7 @@ def addreminder_db(topic, date):
         VALUES('{topic}', '{date}');
         """
         )
+        con.commit()
         con.close()
         return 1
     except sqlite3.Error as e:
