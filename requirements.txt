@@ -13,6 +13,6 @@ prawcore==2.4.0
 python-dotenv==1.0.1
 requests==2.31.0
 update-checker==0.18.0
-urllib3==2.1.0
+urllib3==2.2.0
 websocket-client==1.7.0
 yarl==1.9.4
