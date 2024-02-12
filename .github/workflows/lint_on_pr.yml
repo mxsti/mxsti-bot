@@ -1,4 +1,4 @@
-name: Perform Quality Checks on main PR
+name: Lint Code on PR
 
 on:
   pull_request:
@@ -6,7 +6,6 @@ on:
 
 jobs:
   linting:
-    name: Code Linting
     runs-on: ubuntu-latest
     strategy:
       matrix:
