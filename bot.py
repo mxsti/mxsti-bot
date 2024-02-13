@@ -8,7 +8,7 @@ import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 from utils.reddit import get_post, SubredditNotFoundOrEmptyError
-from utils.database import addreminder_db, fetch_reminders
+from utils.database import addreminder_db, fetch_reminders, delete_reminder
 
 # env variables
 load_dotenv()
@@ -98,10 +98,10 @@ async def addreminder(ctx, topic, date):
                      ctx.author, ctx.command, Error)
         await ctx.send("Das hat nicht geklappt")
     else:
-        await ctx.send(f"Erinnerung für {topic} erfolgreich hinzugefügt")
+        await ctx.message.add_reaction('👍🏻')
 
 
-@tasks.loop(seconds=2.0)
+@tasks.loop(seconds=10.0)
 async def check_reminders():
     """
     Task - Checks all reminders if there is something to remind now
@@ -112,17 +112,18 @@ async def check_reminders():
     """
     reminders = fetch_reminders()
 
-    if isinstance(reminders, Error):  # sqlite Error
-        logger.error("Task: check_reminders - Error: %s", Error)
-        return  # early exit
-
     now = datetime.now().replace(microsecond=0).replace(second=0)
 
     for reminder in reminders:
         time_to_remind = datetime.strptime(reminder[1], "%Y-%m-%d %H:%M:%S")
         if time_to_remind == now:
             channel = bot.get_channel(reminder[2])
-            await channel.send(f"Es ist {now}. Ich sollte dich erinnern: {reminder[0]}")
+            embed = discord.Embed(title="Erinnerung",
+                                  description=reminder[0], color=discord.Colour.random())
+            await channel.send(embed=embed)
+            resp = delete_reminder(reminder[0], reminder[1], reminder[2])
+            if isinstance(resp, Error):  # sqlite Error
+                logger.error("Task: check_reminders - Error: %s", resp)
 
 
 # start the bot

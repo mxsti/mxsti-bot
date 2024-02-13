@@ -53,3 +53,27 @@ def fetch_reminders():
         return reminders
     except sqlite3.Error as e:
         return e  # return back to caller, logging is handled there
+
+
+def delete_reminder(topic, date, channel):
+    """
+    Deletes given reminder from database
+    Parameters:
+        topic: topic of reminder
+        date: date of reminder
+        channel: channel reminder was posted in
+
+    Returns:
+        bool if deletion was successful
+    """
+    try:
+        cur.execute(
+            f"DELETE FROM reminder WHERE"
+            f"(topic = '{topic}')"
+            f"AND (date = '{date}')"
+            f"AND (channel_id = {channel});"
+        )
+        con.commit()
+        return True
+    except sqlite3.Error as e:
+        return e  # return back to caller, logging is handled there
