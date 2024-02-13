@@ -13,13 +13,14 @@ con = sqlite3.connect(db_path)
 cur = con.cursor()
 
 
-def addreminder_db(topic, date):
+def addreminder_db(topic, date, channel):
     """
     Inserts a new row into reminder table
 
     Parameters:
         topic: topic of what is to be reminded
-        data: when to remind the user
+        date: when to remind the user
+        channel: the channel where the command was posted
 
     Returns:
         on success: 1 (int)
@@ -29,14 +30,26 @@ def addreminder_db(topic, date):
         cur.execute(
             f"""
         INSERT INTO reminder
-        (topic, date)
-        VALUES('{topic}', '{date}');
+        (topic, date, channel_id)
+        VALUES('{topic}', '{date}', '{channel}');
         """
         )
         con.commit()
-        con.close()
         return 1
     except sqlite3.Error as e:
-        print(f"Error inserting data into reminder table: {e}")
-        con.close()
-        return e
+        return e  # return back to caller, logging is handled there
+
+
+def fetch_reminders():
+    """
+    Fetches all reminders from the database
+
+    Returns:
+        array of reminders
+    """
+    try:
+        resp = cur.execute("SELECT * FROM reminder;")
+        reminders = resp.fetchall()
+        return reminders
+    except sqlite3.Error as e:
+        return e  # return back to caller, logging is handled there

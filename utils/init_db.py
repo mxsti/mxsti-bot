@@ -17,7 +17,8 @@ cur.execute(
     """
     CREATE TABLE IF NOT EXISTS reminder (
         topic TEXT NOT NULL,
-        date TEXT NOT NULL
+        date TEXT NOT NULL,
+        channel_id INTEGER NOT NULL
     );
     """
 )
