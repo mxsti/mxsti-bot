@@ -10,7 +10,7 @@ class SubredditNotFoundOrEmptyError(Exception):
         message: explanation of the error
     """
 
-    def __init__(self, subredditname, message="Subreddit not found or empty"):
+    def __init__(self, subredditname):
         self.subredditname = subredditname
-        self.message = message
+        self.message = f"Subreddit {subredditname} not found or empty"
         super().__init__(self.message)
