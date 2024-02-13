@@ -68,7 +68,7 @@ async def rreddit(ctx, subredditname: str):
 # REMINDER #
 ############
 @bot.command()
-async def addreminder(ctx, topic, date):
+async def remindme(ctx, topic, date):
     """
     User command - Adds a new reminder to the db
 
