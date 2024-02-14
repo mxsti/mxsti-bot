@@ -7,8 +7,10 @@ from sqlite3 import Error
 import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
-from utils.reddit import get_post, SubredditNotFoundOrEmptyError
+from utils.reddit import get_post
 from utils.database import addreminder_db, fetch_reminders, delete_reminder
+from utils.trackmania_api import fetch_trophy_points, TrackmaniaTrophyRanking
+from utils.exceptions import SubredditNotFoundOrEmptyError, TrackmaniaAPIError
 
 # env variables
 load_dotenv()
@@ -125,6 +127,39 @@ async def check_reminders():
             if isinstance(resp, Error):  # sqlite Error
                 logger.error("Task: check_reminders - Error: %s", resp)
 
+
+##############
+# Trackmania #
+##############
+@bot.command()
+async def tmrank(ctx, account_id):
+    """
+    User command - Grabs trophy points for given user
+
+    Parameters:
+        ctx: Context of the Command (User, Channel ...)
+        account_id: Trackmania Account ID for user
+
+    Returns:
+        nothing - posts in the channel the command was posted
+    """
+    try:
+        rankings: TrackmaniaTrophyRanking = fetch_trophy_points(account_id)
+    except TrackmaniaAPIError as e:
+        logger.error("User: %s - Command: %s - Error: %s",
+                     ctx.author, ctx.command, e)
+        await ctx.send(f"API Abruf für {account_id} fehlgeschlagen")
+
+    embed = discord.Embed(
+        title=f"Trackmania Ranking für {account_id}", color=discord.Colour.random())
+    embed.set_thumbnail(
+        url="https://cdn2.steamgriddb.com/icon/74d2b98d66f5e375d2ee3a7d9e4e1354/8/256x256.png")
+    embed.add_field(name="Trophy Points", value=rankings.trophy_points)
+    for rank in rankings.zone_rankings:
+        print(rank)
+        embed.add_field(name=rank["zone_name"], value=rank["rank"])
+
+    await ctx.send(embed=embed)
 
 # start the bot
 bot.run(bot_token, log_handler=handler)
