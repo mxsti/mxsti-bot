@@ -3,8 +3,8 @@
 from datetime import datetime
 import os
 import logging
-from sqlite3 import Error
 import discord
+import sqlite3
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 from utils.reddit import get_post, SubredditNotFoundOrEmptyError
@@ -91,11 +91,12 @@ async def remindme(ctx, topic, date):
                        f"- Datum und Beschreibung müssen in Anführungszeichen sein")
         return
 
-    resp = addreminder_db(topic, parsed_date, ctx.channel.id)
+    resp = addreminder_db(topic, parsed_date,
+                          ctx.channel.id, ctx.message.author.id)
 
-    if isinstance(resp, Error):  # sqlite Error
+    if isinstance(resp, sqlite3.Error):  # sqlite Error
         logger.error("User: %s - Command: %s - Error: %s",
-                     ctx.author, ctx.command, Error)
+                     ctx.author, ctx.command, resp)
         await ctx.send("Das hat nicht geklappt")
     else:
         await ctx.message.add_reaction('👍🏻')
@@ -119,11 +120,13 @@ async def check_reminders():
         if time_to_remind == now:
             channel = bot.get_channel(reminder[2])
             embed = discord.Embed(title="Erinnerung",
-                                  description=reminder[0], color=discord.Colour.random())
+                                  description=f"<@{reminder[3]}> {reminder[0]}", color=discord.Colour.random())
             await channel.send(embed=embed)
-            resp = delete_reminder(reminder[0], reminder[1], reminder[2])
-            if isinstance(resp, Error):  # sqlite Error
-                logger.error("Task: check_reminders - Error: %s", resp)
+            resp = delete_reminder(
+                reminder[0], reminder[1], reminder[2], reminder[3])
+            if isinstance(resp, sqlite3.Error):  # sqlite Error
+                logger.error("Task: check_reminders - Error: %s",
+                             resp)
 
 
 # start the bot
