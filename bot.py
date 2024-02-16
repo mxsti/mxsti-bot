@@ -116,14 +116,21 @@ async def check_reminders():
     now = datetime.now().replace(microsecond=0).replace(second=0)
 
     for reminder in reminders:
-        time_to_remind = datetime.strptime(reminder[1], "%Y-%m-%d %H:%M:%S")
+        topic = reminder[0]
+        date = reminder[1]
+        channel_id = reminder[2]
+        sender = reminder[3]
+
+        time_to_remind = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
         if time_to_remind == now:
-            channel = bot.get_channel(reminder[2])
+            channel = bot.get_channel(channel_id)
             embed = discord.Embed(title="Erinnerung",
-                                  description=f"<@{reminder[3]}> {reminder[0]}", color=discord.Colour.random())
+                                  description=f"<@{sender}>\n{topic}", color=discord.Colour.random())
+            # create funny avatar for user
+            embed.set_thumbnail(url=f'https://robohash.org/{sender}')
             await channel.send(embed=embed)
             resp = delete_reminder(
-                reminder[0], reminder[1], reminder[2], reminder[3])
+                topic, date, channel_id, sender)
             if isinstance(resp, sqlite3.Error):  # sqlite Error
                 logger.error("Task: check_reminders - Error: %s",
                              resp)
