@@ -3,8 +3,8 @@
 from datetime import datetime
 import os
 import logging
-import discord
 import sqlite3
+import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 from utils.reddit import get_post, SubredditNotFoundOrEmptyError
@@ -124,8 +124,11 @@ async def check_reminders():
         time_to_remind = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
         if time_to_remind == now:
             channel = bot.get_channel(channel_id)
-            embed = discord.Embed(title="Erinnerung",
-                                  description=f"<@{sender}>\n{topic}", color=discord.Colour.random())
+            embed_title = "Erinnerung"
+            embed_desc = f"<@{sender}>\n{topic}"
+            embed_color = discord.Color.random()
+            embed = discord.Embed(
+                title=embed_title, description=embed_desc, color=embed_color)
             # create funny avatar for user
             embed.set_thumbnail(url=f'https://robohash.org/{sender}')
             await channel.send(embed=embed)
