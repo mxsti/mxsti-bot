@@ -13,7 +13,7 @@ con = sqlite3.connect(db_path)
 cur = con.cursor()
 
 
-def addreminder_db(topic, date, channel):
+def addreminder_db(topic, date, channel, sender):
     """
     Inserts a new row into reminder table
 
@@ -21,6 +21,7 @@ def addreminder_db(topic, date, channel):
         topic: topic of what is to be reminded
         date: when to remind the user
         channel: the channel where the command was posted
+        sender: the user who send the reminder
 
     Returns:
         on success: 1 (int)
@@ -30,8 +31,8 @@ def addreminder_db(topic, date, channel):
         cur.execute(
             f"""
         INSERT INTO reminder
-        (topic, date, channel_id)
-        VALUES('{topic}', '{date}', '{channel}');
+        (topic, date, channel_id, sender)
+        VALUES('{topic}', '{date}', '{channel}', '{sender}');
         """
         )
         con.commit()
@@ -55,7 +56,7 @@ def fetch_reminders():
         return e  # return back to caller, logging is handled there
 
 
-def delete_reminder(topic, date, channel):
+def delete_reminder(topic, date, channel, sender):
     """
     Deletes given reminder from database
     Parameters:
@@ -64,14 +65,15 @@ def delete_reminder(topic, date, channel):
         channel: channel reminder was posted in
 
     Returns:
-        bool if deletion was successful
+        True or sqlite Error
     """
     try:
         cur.execute(
             f"DELETE FROM reminder WHERE"
             f"(topic = '{topic}')"
             f"AND (date = '{date}')"
-            f"AND (channel_id = {channel});"
+            f"AND (channel_id = {channel})"
+            f"AND (sender = {sender});"
         )
         con.commit()
         return True

@@ -3,7 +3,7 @@
 from datetime import datetime
 import os
 import logging
-from sqlite3 import Error
+import sqlite3
 import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
@@ -91,11 +91,12 @@ async def remindme(ctx, topic, date):
                        f"- Datum und Beschreibung müssen in Anführungszeichen sein")
         return
 
-    resp = addreminder_db(topic, parsed_date, ctx.channel.id)
+    resp = addreminder_db(topic, parsed_date,
+                          ctx.channel.id, ctx.message.author.id)
 
-    if isinstance(resp, Error):  # sqlite Error
+    if isinstance(resp, sqlite3.Error):  # sqlite Error
         logger.error("User: %s - Command: %s - Error: %s",
-                     ctx.author, ctx.command, Error)
+                     ctx.author, ctx.command, resp)
         await ctx.send("Das hat nicht geklappt")
     else:
         await ctx.message.add_reaction('👍🏻')
@@ -115,15 +116,27 @@ async def check_reminders():
     now = datetime.now().replace(microsecond=0).replace(second=0)
 
     for reminder in reminders:
-        time_to_remind = datetime.strptime(reminder[1], "%Y-%m-%d %H:%M:%S")
+        topic = reminder[0]
+        date = reminder[1]
+        channel_id = reminder[2]
+        sender = reminder[3]
+
+        time_to_remind = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
         if time_to_remind == now:
-            channel = bot.get_channel(reminder[2])
-            embed = discord.Embed(title="Erinnerung",
-                                  description=reminder[0], color=discord.Colour.random())
+            channel = bot.get_channel(channel_id)
+            embed_title = "Erinnerung"
+            embed_desc = f"<@{sender}>\n{topic}"
+            embed_color = discord.Color.random()
+            embed = discord.Embed(
+                title=embed_title, description=embed_desc, color=embed_color)
+            # create funny avatar for user
+            embed.set_thumbnail(url=f'https://robohash.org/{sender}')
             await channel.send(embed=embed)
-            resp = delete_reminder(reminder[0], reminder[1], reminder[2])
-            if isinstance(resp, Error):  # sqlite Error
-                logger.error("Task: check_reminders - Error: %s", resp)
+            resp = delete_reminder(
+                topic, date, channel_id, sender)
+            if isinstance(resp, sqlite3.Error):  # sqlite Error
+                logger.error("Task: check_reminders - Error: %s",
+                             resp)
 
 
 # start the bot
