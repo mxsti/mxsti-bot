@@ -80,6 +80,11 @@ async def remindme(ctx, topic, date):
     Returns:
         nothing - posts in the channel the command was posted (success or error)
     """
+    # check if reminder is for today or another day
+    if len(date.split(" ")) == 1:
+        today_day = datetime.now().day
+        today_month = datetime.now().month
+        date = f"{today_day}.{today_month}. {date}"
     # parse datetime
     try:
         parsed_date = datetime.strptime(
