@@ -7,9 +7,10 @@ import sqlite3
 import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
-from utils.reddit import get_post, SubredditNotFoundOrEmptyError
+from utils.reddit import get_post
 from utils.database import addreminder_db, fetch_reminders, delete_reminder
 from utils.weather_api import parse_weather_data_by_location
+from utils.exceptions import WeatherAPIError, SubredditNotFoundOrEmptyError
 
 # env variables
 load_dotenv()
@@ -163,6 +164,11 @@ async def weather(ctx, location):
 
     # get the weather objects
     weather_forecast = parse_weather_data_by_location(location)
+    if isinstance(weather_forecast, WeatherAPIError):
+        logger.error("User: %s - Command: %s - Error: %s",
+                     ctx.author, ctx.command, weather_forecast)
+        await ctx.send(f"Ort {location} nicht gefunden")
+        return
 
     # build the embed
     embed_title = f"Wetter Vorhersage für {weather_forecast[0].location}"
