@@ -14,3 +14,18 @@ class SubredditNotFoundOrEmptyError(Exception):
         self.subredditname = subredditname
         self.message = f"Subreddit {subredditname} not found or empty"
         super().__init__(self.message)
+
+
+class WeatherAPIError(Exception):
+    """
+    Custom Exception when communication with the tommorow weather api went wrong
+
+    Attributes:
+        message: http error message
+        code: http error code
+    """
+
+    def __init__(self, message, code):
+        self.code = code
+        self.message = f"{code}: {message}"
+        super().__init__(self.message)
