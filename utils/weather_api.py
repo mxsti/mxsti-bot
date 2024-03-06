@@ -23,6 +23,7 @@ class Weather():
     temperature: float = None
     humidity: str = None
     wind: str = None
+    weather_code: int = None
 
 
 def grab_forecast_by_city(location):
@@ -70,12 +71,15 @@ def parse_weather_data_by_location(location_input):
         temp = values["temperature"]
         humi = values["humidity"]
         wind = values["windSpeed"]
+        weather_code = values["weatherCode"]
+        print(weather_code)
         return Weather(
             location=location,
             time=datetime.strftime(time, "%d.%m. %H:%M Uhr"),
             temperature=temp,
             humidity=humi,
-            wind=wind)
+            wind=wind,
+            weather_code=weather_code)
 
     next_hour = create_weather_object(hourly[2]["values"], location, datetime.strptime(
         hourly[2]["time"], "%Y-%m-%dT%H:%M:%SZ"))

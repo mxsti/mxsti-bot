@@ -171,10 +171,14 @@ async def weather(ctx, location):
         return
 
     # build the embed
+    weather_code = weather_forecast[0].weather_code
+    icon = discord.File(
+        f"utils/weather_icons/{weather_code}.png", filename=f"{weather_code}.png")
     embed_title = f"Wetter Vorhersage für {weather_forecast[0].location}"
     embed_color = discord.Color.random()
     embed = discord.Embed(
         title=embed_title, color=embed_color)
+    embed.set_thumbnail(url=f"attachment://{weather_code}.png")
     embed.add_field(
         name=weather_forecast[0].time,
         value=f"""
@@ -200,7 +204,7 @@ async def weather(ctx, location):
         {weather_forecast[3].wind} km/h Wind
         {weather_forecast[3].humidity}% Feuchtigkeit""")
 
-    await ctx.send(embed=embed)
+    await ctx.send(file=icon, embed=embed)
 
 
 # start the bot
