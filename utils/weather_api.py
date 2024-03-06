@@ -2,6 +2,7 @@
 
 import os
 from datetime import datetime
+from dataclasses import dataclass
 import urllib.parse
 import requests
 from dotenv import load_dotenv
@@ -12,17 +13,16 @@ load_dotenv()
 API_KEY = os.environ.get("TOMMOROW_WEATHER_API_KEY")
 
 
+@dataclass
 class Weather():
     """
     Class containing weather information
     """
-
-    def __init__(self, location, time, temperature, humidity, wind):
-        self.location = location
-        self.time = time
-        self.temperature = temperature
-        self.humidity = humidity
-        self.wind = wind
+    location: str = None
+    time: datetime = None
+    temperature: float = None
+    humidity: str = None
+    wind: str = None
 
 
 def grab_forecast_by_city(location):
@@ -70,7 +70,12 @@ def parse_weather_data_by_location(location_input):
         temp = values["temperature"]
         humi = values["humidity"]
         wind = values["windSpeed"]
-        return Weather(location=location, time=datetime.strftime(time, "%d.%m. %H:%M Uhr"), temperature=temp, humidity=humi, wind=wind)
+        return Weather(
+            location=location,
+            time=datetime.strftime(time, "%d.%m. %H:%M Uhr"),
+            temperature=temp,
+            humidity=humi,
+            wind=wind)
 
     next_hour = create_weather_object(hourly[2]["values"], location, datetime.strptime(
         hourly[2]["time"], "%Y-%m-%dT%H:%M:%SZ"))
