@@ -1,9 +1,11 @@
+""" helper functions to interact with tomorrow weather api """
+
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 import urllib.parse
 import requests
 from dotenv import load_dotenv
-from exceptions import WeatherAPIError
+from utils.exceptions import WeatherAPIError
 
 load_dotenv()
 
@@ -11,6 +13,10 @@ API_KEY = os.environ.get("TOMMOROW_WEATHER_API_KEY")
 
 
 class Weather():
+    """
+    Class containing weather information
+    """
+
     def __init__(self, location, time, temperature, humidity, wind):
         self.location = location
         self.time = time
@@ -19,8 +25,17 @@ class Weather():
         self.wind = wind
 
 
-def grab_forecast_by_city(city):
-    encoded_city = urllib.parse.quote(city)
+def grab_forecast_by_city(location):
+    """
+    Calls the Weather API (api.tomorrow.io) and grabs a weather forecast
+
+    Parameters:
+        location - location string defining for where the api should get the weather for
+
+    Returns:
+        response JSON from the weather api
+    """
+    encoded_city = urllib.parse.quote(location)
     url = f"https://api.tomorrow.io/v4/weather/forecast?location={encoded_city}&apikey={API_KEY}"
 
     headers = {"accept": "application/json"}
@@ -33,9 +48,18 @@ def grab_forecast_by_city(city):
     raise WeatherAPIError(response_json["message"], response.status_code)
 
 
-def parse_weather_data_by_city(city):
+def parse_weather_data_by_location(location_input):
+    """
+    Parses the response json from the weather api and puts it in the weather class
+
+    Parameters:
+        location_input - location string defining for where the api should get the weather for
+
+    Returns:
+        array - array containing 4 weather objects with the forecast for the next 6 hours
+    """
     try:
-        data = grab_forecast_by_city(city)
+        data = grab_forecast_by_city(location_input)
     except WeatherAPIError as e:
         return e
 
@@ -46,15 +70,18 @@ def parse_weather_data_by_city(city):
         temp = values["temperature"]
         humi = values["humidity"]
         wind = values["windSpeed"]
-        return Weather(location, time, temp, humi, wind)
+        return Weather(location=location, time=datetime.strftime(time, "%d.%m. %H:%M Uhr"), temperature=temp, humidity=humi, wind=wind)
 
-    next_hour = create_weather_object(hourly[2]["values"], datetime.strptime(
-        hourly[2]["time"], "%Y-%m-%dT%H:%M:%SZ"), location)
+    next_hour = create_weather_object(hourly[2]["values"], location, datetime.strptime(
+        hourly[2]["time"], "%Y-%m-%dT%H:%M:%SZ"))
 
-    print(next_hour.location)
-    print(next_hour.time)
-    print(next_hour.temperature)
-    print(next_hour.wind)
+    two_hours = create_weather_object(hourly[4]["values"], location, datetime.strptime(
+        hourly[4]["time"], "%Y-%m-%dT%H:%M:%SZ"))
 
+    fours_hours = create_weather_object(hourly[6]["values"], location, datetime.strptime(
+        hourly[6]["time"], "%Y-%m-%dT%H:%M:%SZ"))
 
-parse_weather_data_by_city("neuhäsen")
+    six_hours = create_weather_object(hourly[8]["values"], location, datetime.strptime(
+        hourly[8]["time"], "%Y-%m-%dT%H:%M:%SZ"))
+
+    return [next_hour, two_hours, fours_hours, six_hours]

@@ -9,6 +9,7 @@ from discord.ext import commands, tasks
 from dotenv import load_dotenv
 from utils.reddit import get_post, SubredditNotFoundOrEmptyError
 from utils.database import addreminder_db, fetch_reminders, delete_reminder
+from utils.weather_api import parse_weather_data_by_location
 
 # env variables
 load_dotenv()
@@ -142,6 +143,58 @@ async def check_reminders():
             if isinstance(resp, sqlite3.Error):  # sqlite Error
                 logger.error("Task: check_reminders - Error: %s",
                              resp)
+
+
+###########
+# WEATHER #
+###########
+@bot.command()
+async def weather(ctx, location):
+    """
+    User command - Gets the weather for the location
+
+    Parameters:
+        ctx: Context of the Command (User, Channel ...)
+        location: location where the forecast is for
+
+    Returns:
+        nothing - posts in the channel the command was posted (success or error)
+    """
+
+    # get the weather objects
+    weather_forecast = parse_weather_data_by_location(location)
+
+    # build the embed
+    embed_title = f"Wetter Vorhersage für {weather_forecast[0].location}"
+    embed_color = discord.Color.random()
+    embed = discord.Embed(
+        title=embed_title, color=embed_color)
+    embed.add_field(
+        name=weather_forecast[0].time,
+        value=f"""
+        {weather_forecast[0].temperature} °C
+        {weather_forecast[0].wind} km/h Wind
+        {weather_forecast[0].humidity}% Feuchtigkeit""")
+    embed.add_field(
+        name=weather_forecast[1].time,
+        value=f"""
+        {weather_forecast[1].temperature} °C
+        {weather_forecast[1].wind} km/h Wind
+        {weather_forecast[1].humidity}% Feuchtigkeit""")
+    embed.add_field(
+        name=weather_forecast[2].time,
+        value=f"""
+        {weather_forecast[2].temperature} °C
+        {weather_forecast[2].wind} km/h Wind
+        {weather_forecast[2].humidity}% Feuchtigkeit""")
+    embed.add_field(
+        name=weather_forecast[3].time,
+        value=f"""
+        {weather_forecast[3].temperature} °C
+        {weather_forecast[3].wind} km/h Wind
+        {weather_forecast[3].humidity}% Feuchtigkeit""")
+
+    await ctx.send(embed=embed)
 
 
 # start the bot
