@@ -9,7 +9,8 @@ from discord.ext import commands, tasks
 from dotenv import load_dotenv
 from utils.reddit import get_post
 from utils.database import addreminder_db, fetch_reminders, delete_reminder
-from utils.weather_api import parse_weather_data_by_location_today, parse_weather_data_by_location_tomorrow
+from utils.weather_api import (
+    parse_weather_data_by_location_today, parse_weather_data_by_location_tomorrow)
 from utils.exceptions import WeatherAPIError, SubredditNotFoundOrEmptyError
 
 # env variables
