@@ -21,8 +21,13 @@ class Weather():
     location: str = None
     time: datetime = None
     temperature: float = None
+    temperature_max: float = None
+    temperature_min: float = None
+    temperature_avg: float = None
     humidity: str = None
     wind: str = None
+    sunrise_time: datetime = None
+    sunset_time: datetime = None
     weather_code: int = None
 
 
@@ -49,7 +54,7 @@ def grab_forecast_by_city(location):
     raise WeatherAPIError(response_json["message"], response.status_code)
 
 
-def parse_weather_data_by_location(location_input):
+def parse_weather_data_by_location_today(location_input):
     """
     Parses the response json from the weather api and puts it in the weather class
 
@@ -72,7 +77,6 @@ def parse_weather_data_by_location(location_input):
         humi = values["humidity"]
         wind = values["windSpeed"]
         weather_code = values["weatherCode"]
-        print(weather_code)
         return Weather(
             location=location,
             time=datetime.strftime(time, "%d.%m. %H:%M Uhr"),
@@ -94,3 +98,43 @@ def parse_weather_data_by_location(location_input):
         hourly[8]["time"], "%Y-%m-%dT%H:%M:%SZ"))
 
     return [next_hour, two_hours, fours_hours, six_hours]
+
+
+def parse_weather_data_by_location_tomorrow(location_input):
+    """
+    Parses the response json from the weather api and puts it in the weather class
+
+    Parameters:
+        location_input - location string defining for where the api should get the weather for
+
+    Returns:
+        weather - weather object containing weather forecast for the upcoming day
+    """
+    try:
+        data = grab_forecast_by_city(location_input)
+    except WeatherAPIError as e:
+        return e
+
+    daily = data["timelines"]["daily"]
+    location = data["location"]["name"]
+
+    def create_weather_object(values, location, time):
+        temp_max = values["temperatureMax"]
+        temp_min = values["temperatureMin"]
+        temp_avg = values["temperatureAvg"]
+        weather_code = values["weatherCodeMax"]
+        sunrise = datetime.strptime(
+            values["sunriseTime"], "%Y-%m-%dT%H:%M:%SZ")
+        sunset = datetime.strptime(values["sunsetTime"], "%Y-%m-%dT%H:%M:%SZ")
+        return Weather(
+            location=location,
+            time=datetime.strftime(time, "%d.%m.%Y"),
+            temperature_max=temp_max,
+            temperature_min=temp_min,
+            temperature_avg=temp_avg,
+            weather_code=weather_code,
+            sunrise_time=datetime.strftime(sunrise, "%H:%M Uhr"),
+            sunset_time=datetime.strftime(sunset, "%H:%M Uhr"),)
+
+    return create_weather_object(daily[1]["values"], location, datetime.strptime(
+        daily[1]["time"], "%Y-%m-%dT%H:%M:%SZ"))

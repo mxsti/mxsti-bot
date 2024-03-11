@@ -9,7 +9,7 @@ from discord.ext import commands, tasks
 from dotenv import load_dotenv
 from utils.reddit import get_post
 from utils.database import addreminder_db, fetch_reminders, delete_reminder
-from utils.weather_api import parse_weather_data_by_location
+from utils.weather_api import parse_weather_data_by_location_today, parse_weather_data_by_location_tomorrow
 from utils.exceptions import WeatherAPIError, SubredditNotFoundOrEmptyError
 
 # env variables
@@ -163,7 +163,7 @@ async def weather(ctx, location):
     """
 
     # get the weather objects
-    weather_forecast = parse_weather_data_by_location(location)
+    weather_forecast = parse_weather_data_by_location_today(location)
     if isinstance(weather_forecast, WeatherAPIError):
         logger.error("User: %s - Command: %s - Error: %s",
                      ctx.author, ctx.command, weather_forecast)
@@ -179,30 +179,55 @@ async def weather(ctx, location):
     embed = discord.Embed(
         title=embed_title, color=embed_color)
     embed.set_thumbnail(url=f"attachment://{weather_code}.png")
+    for forecast in weather_forecast:
+        embed.add_field(
+            name=forecast.time,
+            value=f"""
+                {forecast.temperature} °C
+                {forecast.wind} km/h Wind
+                {forecast.humidity}% Feuchtigkeit""")
+
+    await ctx.send(file=icon, embed=embed)
+
+
+@bot.command()
+async def weathertm(ctx, location):
+    """
+    User command - Gets the weather for the location
+
+    Parameters:
+        ctx: Context of the Command (User, Channel ...)
+        location: location where the forecast is for
+
+    Returns:
+        nothing - posts in the channel the command was posted (success or error)
+    """
+
+    # get the weather objects
+    weather_forecast = parse_weather_data_by_location_tomorrow(location)
+    if isinstance(weather_forecast, WeatherAPIError):
+        logger.error("User: %s - Command: %s - Error: %s",
+                     ctx.author, ctx.command, weather_forecast)
+        await ctx.send(f"Ort {location} nicht gefunden")
+        return
+
+    # build the embed
+    weather_code = weather_forecast.weather_code
+    icon = discord.File(
+        f"utils/weather_icons/{weather_code}.png", filename=f"{weather_code}.png")
+    embed_title = f"Wetter Vorhersage für {weather_forecast.location}"
+    embed_color = discord.Color.random()
+    embed = discord.Embed(
+        title=embed_title, color=embed_color)
+    embed.set_thumbnail(url=f"attachment://{weather_code}.png")
     embed.add_field(
-        name=weather_forecast[0].time,
+        name=weather_forecast.time,
         value=f"""
-        {weather_forecast[0].temperature} °C
-        {weather_forecast[0].wind} km/h Wind
-        {weather_forecast[0].humidity}% Feuchtigkeit""")
-    embed.add_field(
-        name=weather_forecast[1].time,
-        value=f"""
-        {weather_forecast[1].temperature} °C
-        {weather_forecast[1].wind} km/h Wind
-        {weather_forecast[1].humidity}% Feuchtigkeit""")
-    embed.add_field(
-        name=weather_forecast[2].time,
-        value=f"""
-        {weather_forecast[2].temperature} °C
-        {weather_forecast[2].wind} km/h Wind
-        {weather_forecast[2].humidity}% Feuchtigkeit""")
-    embed.add_field(
-        name=weather_forecast[3].time,
-        value=f"""
-        {weather_forecast[3].temperature} °C
-        {weather_forecast[3].wind} km/h Wind
-        {weather_forecast[3].humidity}% Feuchtigkeit""")
+            {weather_forecast.temperature_avg} °C Durchschnitt
+            {weather_forecast.temperature_max} °C Max
+            {weather_forecast.temperature_min} °C Min
+            {weather_forecast.sunrise_time} Sonnenaufgang
+            {weather_forecast.sunset_time} Sonnenuntergang""")
 
     await ctx.send(file=icon, embed=embed)
 
