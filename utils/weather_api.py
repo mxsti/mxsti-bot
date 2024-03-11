@@ -16,19 +16,35 @@ API_KEY = os.environ.get("TOMMOROW_WEATHER_API_KEY")
 @dataclass
 class Weather():
     """
-    Class containing weather information
+    Class containing weather metadata
     """
     location: str = None
     time: datetime = None
+    weather_code: int = None
+
+
+@dataclass
+class WeatherToday():
+    """
+    Class containing todays weather information
+    """
+    metadata: Weather = None
     temperature: float = None
+    humidity: str = None
+    wind: str = None
+
+
+@dataclass
+class WeatherTomorrow():
+    """
+    Class containing tomorrows weather information
+    """
+    metadata: Weather = None
     temperature_max: float = None
     temperature_min: float = None
     temperature_avg: float = None
-    humidity: str = None
-    wind: str = None
     sunrise_time: datetime = None
     sunset_time: datetime = None
-    weather_code: int = None
 
 
 def grab_forecast_by_city(location):
@@ -77,13 +93,12 @@ def parse_weather_data_by_location_today(location_input):
         humi = values["humidity"]
         wind = values["windSpeed"]
         weather_code = values["weatherCode"]
-        return Weather(
-            location=location,
-            time=datetime.strftime(time, "%d.%m. %H:%M Uhr"),
+        return WeatherToday(
+            metadata=Weather(location=location, time=datetime.strftime(
+                time, "%d.%m. %H:%M Uhr"), weather_code=weather_code),
             temperature=temp,
             humidity=humi,
-            wind=wind,
-            weather_code=weather_code)
+            wind=wind)
 
     next_hour = create_weather_object(hourly[2]["values"], location, datetime.strptime(
         hourly[2]["time"], "%Y-%m-%dT%H:%M:%SZ"))
@@ -126,13 +141,12 @@ def parse_weather_data_by_location_tomorrow(location_input):
         sunrise = datetime.strptime(
             values["sunriseTime"], "%Y-%m-%dT%H:%M:%SZ")
         sunset = datetime.strptime(values["sunsetTime"], "%Y-%m-%dT%H:%M:%SZ")
-        return Weather(
-            location=location,
-            time=datetime.strftime(time, "%d.%m.%Y"),
+        return WeatherTomorrow(
+            metadata=Weather(location=location, time=datetime.strftime(
+                time, "%d.%m.%Y "), weather_code=weather_code),
             temperature_max=temp_max,
             temperature_min=temp_min,
             temperature_avg=temp_avg,
-            weather_code=weather_code,
             sunrise_time=datetime.strftime(sunrise, "%H:%M Uhr"),
             sunset_time=datetime.strftime(sunset, "%H:%M Uhr"),)
 

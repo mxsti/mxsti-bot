@@ -172,17 +172,17 @@ async def weather(ctx, location):
         return
 
     # build the embed
-    weather_code = weather_forecast[0].weather_code
+    weather_code = weather_forecast[0].metadata.weather_code
     icon = discord.File(
         f"utils/weather_icons/{weather_code}.png", filename=f"{weather_code}.png")
-    embed_title = f"Wetter Vorhersage für {weather_forecast[0].location}"
+    embed_title = f"Wetter Vorhersage für {weather_forecast[0].metadata.location}"
     embed_color = discord.Color.random()
     embed = discord.Embed(
         title=embed_title, color=embed_color)
     embed.set_thumbnail(url=f"attachment://{weather_code}.png")
     for forecast in weather_forecast:
         embed.add_field(
-            name=forecast.time,
+            name=forecast.metadata.time,
             value=f"""
                 {forecast.temperature} °C
                 {forecast.wind} km/h Wind
@@ -213,16 +213,16 @@ async def weathertm(ctx, location):
         return
 
     # build the embed
-    weather_code = weather_forecast.weather_code
+    weather_code = weather_forecast.metadata.weather_code
     icon = discord.File(
         f"utils/weather_icons/{weather_code}.png", filename=f"{weather_code}.png")
-    embed_title = f"Wetter Vorhersage für {weather_forecast.location}"
+    embed_title = f"Wetter Vorhersage für {weather_forecast.metadata.location}"
     embed_color = discord.Color.random()
     embed = discord.Embed(
         title=embed_title, color=embed_color)
     embed.set_thumbnail(url=f"attachment://{weather_code}.png")
     embed.add_field(
-        name=weather_forecast.time,
+        name=weather_forecast.metadata.time,
         value=f"""
             {weather_forecast.temperature_avg} °C Durchschnitt
             {weather_forecast.temperature_max} °C Max
