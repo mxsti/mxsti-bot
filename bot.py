@@ -266,7 +266,7 @@ async def addbike(ctx, name, variant, url):
         await ctx.message.add_reaction('👍🏻')
 
 
-@tasks.loop(seconds=10.0)
+@tasks.loop(minutes=30.0)
 async def loop_check_bikes():
     """
     Task - Checks all bikes and send a message if a bike is available
