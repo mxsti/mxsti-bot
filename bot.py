@@ -291,7 +291,7 @@ async def removebike(ctx, name, variant):
         await ctx.message.add_reaction("👍🏻")
 
 
-@tasks.loop(seconds=20.0)
+@tasks.loop(minutes=30)
 async def loop_check_bikes():
     """
     Task - Checks all bikes and send a message if a bike is available
@@ -310,7 +310,7 @@ async def loop_check_bikes():
             channel = bot.get_channel(bike[3])
             embed_title = "Bike verfügbar!"
             embed_desc = f"""
-                        Hey < @{bike[4]} >
+                        Hey <@{bike[4]}>
                         das Bike {bike[0]} in {bike[1]} ist jetzt verfügbar!\n{bike[2]}"""
             embed_color = discord.Color.random()
             embed = discord.Embed(
