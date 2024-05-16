@@ -16,6 +16,10 @@ cur = con.cursor()
 # REMINDER #
 ###########
 
+############
+# REMINDER #
+###########
+
 
 def addreminder_db(topic, date, channel, sender):
     """
