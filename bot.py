@@ -8,7 +8,7 @@ import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 from utils.reddit import get_post
-from utils.database import addreminder_db, fetch_reminders, delete_reminder, add_bike, fetch_bikes
+from utils.database import addreminder_db, delete_bike, fetch_reminders, delete_reminder, add_bike, fetch_bikes
 from utils.weather_api import (
     parse_weather_data_by_location_today, parse_weather_data_by_location_tomorrow)
 from utils.exceptions import WeatherAPIError, SubredditNotFoundOrEmptyError
@@ -249,7 +249,7 @@ async def addbike(ctx, name, variant, url):
         ctx: Context of the Command (User, Channel ...)
         name: name of the bike (e.g. Canyon Endurace AL6)
         variant: variant of the bike (3XS - 2XL)
-        url: url of the bike in the shop 
+        url: url of the bike in the shop
 
     Returns:
         nothing - posts in the channel the command was posted (success or error)
@@ -263,10 +263,33 @@ async def addbike(ctx, name, variant, url):
                      ctx.author, ctx.command, resp)
         await ctx.send("Das hat nicht geklappt")
     else:
-        await ctx.message.add_reaction('👍🏻')
+        await ctx.message.add_reaction("👍🏻")
 
 
-@tasks.loop(minutes=30.0)
+@bot.command()
+async def removebike(ctx, name, variant):
+    """
+    User command - removes a bike from the db
+
+    Parameters:
+        ctx: Context of the Command (User, Channel ...)
+        name: name of the bike (e.g. Canyon Endurace AL6)
+        variant: variant of the bike (3XS - 2XL)
+
+    Returns:
+        nothing - posts in the channel the command was posted (success or error)
+    """
+    resp = delete_bike(
+        name, variant, ctx.channel.id, ctx.message.author.id)
+    if isinstance(resp, sqlite3.Error):  # sqlite Error
+        logger.error("User: %s - Command: %s - Error: %s",
+                     ctx.author, ctx.command, resp)
+        await ctx.send("Bike konnte nicht gelöscht werden :(")
+    else:
+        await ctx.message.add_reaction("👍🏻")
+
+
+@tasks.loop(seconds=20.0)
 async def loop_check_bikes():
     """
     Task - Checks all bikes and send a message if a bike is available
@@ -285,7 +308,7 @@ async def loop_check_bikes():
             channel = bot.get_channel(bike[3])
             embed_title = "Bike verfügbar!"
             embed_desc = f"""
-                        Hey < @{bike[4]} >,
+                        Hey < @{bike[4]} >
                         das Bike {bike[0]} in {bike[1]} ist jetzt verfügbar!\n{bike[2]}"""
             embed_color = discord.Color.random()
             embed = discord.Embed(
