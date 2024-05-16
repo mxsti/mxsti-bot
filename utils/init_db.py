@@ -23,3 +23,16 @@ cur.execute(
     );
     """
 )
+
+# canyon table
+cur.execute(
+    """
+    CREATE TABLE IF NOT EXISTS bike (
+        name TEXT NOT NULL,
+        variant TEXT NOT NULL,
+        url TEXT NOT NULL,
+        channel_id INTEGER NOT NULL,
+        sender TEXT NOT NULL
+    );
+    """
+)
