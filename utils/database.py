@@ -16,6 +16,10 @@ cur = con.cursor()
 # REMINDER #
 ###########
 
+############
+# REMINDER #
+###########
+
 
 def addreminder_db(topic, date, channel, sender):
     """
@@ -130,5 +134,31 @@ def fetch_bikes():
         resp = cur.execute("SELECT * FROM bike;")
         bikes = resp.fetchall()
         return bikes
+    except sqlite3.Error as e:
+        return e  # return back to caller, logging is handled there
+
+
+def delete_bike(name, variant, channel, sender):
+    """
+    Deletes given bike from database
+    Parameters:
+        name: name of the bike which should be deleted
+        variant: variant of the bike
+        channel: channel reminder was posted in
+        sender: user who added the bike
+
+    Returns:
+        True or sqlite Error
+    """
+    try:
+        cur.execute(
+            f"DELETE FROM bike WHERE"
+            f"(name = '{name}')"
+            f"AND (variant = '{variant}')"
+            f"AND (channel_id = {channel})"
+            f"AND (sender = {sender});"
+        )
+        con.commit()
+        return True
     except sqlite3.Error as e:
         return e  # return back to caller, logging is handled there
