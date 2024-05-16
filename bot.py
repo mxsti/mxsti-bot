@@ -7,12 +7,14 @@ import sqlite3
 import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
-from utils.reddit import get_post
-from utils.database import addreminder_db, delete_bike, fetch_reminders, delete_reminder, add_bike, fetch_bikes
+from utils.canyon_bikes import check_bike
+from utils.exceptions import WeatherAPIError, SubredditNotFoundOrEmptyError
 from utils.weather_api import (
     parse_weather_data_by_location_today, parse_weather_data_by_location_tomorrow)
-from utils.exceptions import WeatherAPIError, SubredditNotFoundOrEmptyError
-from utils.canyon_bikes import check_bike
+from utils.reddit import get_post
+from utils.database import (
+    addreminder_db, delete_bike, fetch_reminders,
+    delete_reminder, add_bike, fetch_bikes)
 
 # env variables
 load_dotenv()
