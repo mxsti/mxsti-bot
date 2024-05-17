@@ -335,7 +335,7 @@ async def unmutebike(ctx, name, variant):
         await ctx.message.add_reaction("👍🏻")
 
 
-@tasks.loop(seconds=20)
+@tasks.loop(minutes=30)
 async def loop_check_bikes():
     """
     Task - Checks all bikes and send a message if a bike is available
@@ -345,7 +345,10 @@ async def loop_check_bikes():
         nothing - posts in the channel if there is a available bike
     """
     bikes = fetch_bikes()
-
+    if isinstance(bikes, sqlite3.Error):
+        logger.error("Task: loop_check_bikes - Error: %s",
+                     bikes)
+        return
     for bike in bikes:
         bike_with_availability = check_bike(
             name=bike[0], variant=bike[1], url=bike[2])

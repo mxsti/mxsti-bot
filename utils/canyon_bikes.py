@@ -38,10 +38,8 @@ def check_bike(name, variant, url):
     variants = soup.find_all(class_="productConfiguration__selectVariant")
     for v in variants:
         if v.getText().strip() == variant:
-            if "js-unpurchasable" in v["class"]:
-                return (Bike(name=name, variant=variant,
-                             url=url, available=False))
             if "productConfiguration__selectVariant--purchasable" in v["class"]:
                 return (Bike(name=name, variant=variant,
                              url=url, available=True))
-    return None
+    return (Bike(name=name, variant=variant,
+                 url=url, available=False))
