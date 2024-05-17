@@ -14,7 +14,7 @@ from utils.weather_api import (
 from utils.reddit import get_post
 from utils.database import (
     addreminder_db, delete_bike, fetch_reminders,
-    delete_reminder, add_bike, fetch_bikes)
+    delete_reminder, add_bike, fetch_bikes, mute_bike, unmute_bike)
 
 # env variables
 load_dotenv()
@@ -291,7 +291,51 @@ async def removebike(ctx, name, variant):
         await ctx.message.add_reaction("👍🏻")
 
 
-@tasks.loop(minutes=30)
+@bot.command()
+async def mutebike(ctx, name, variant):
+    """
+    User command - mutes a bike (still in db but not checked anymore)
+
+    Parameters
+        ctx: Context of the Command (User, Channel ...)
+        name: name of the bike (e.g. Canyon Endurace AL6)
+        variant: variant of the bike (3XS - 2XL)
+
+    Returns:
+        nothing - posts in the channel the command was posted (success or error)
+    """
+    resp = mute_bike(name, variant, ctx.channel.id, ctx.message.author.id)
+    if isinstance(resp, sqlite3.Error):
+        logger.error("User: %s - Command: %s - Error: %s",
+                     ctx.author, ctx.command, resp)
+        await ctx.send("Bike konnte nicht gemuted werden.")
+    else:
+        await ctx.message.add_reaction("👍🏻")
+
+
+@bot.command()
+async def unmutebike(ctx, name, variant):
+    """
+    User command - unmutes a bike (still in db but not checked anymore)
+
+    Parameters
+        ctx: Context of the Command (User, Channel ...)
+        name: name of the bike (e.g. Canyon Endurace AL6)
+        variant: variant of the bike (3XS - 2XL)
+
+    Returns:
+        nothing - posts in the channel the command was posted (success or error)
+    """
+    resp = unmute_bike(name, variant, ctx.channel.id, ctx.message.author.id)
+    if isinstance(resp, sqlite3.Error):
+        logger.error("User: %s - Command: %s - Error: %s",
+                     ctx.author, ctx.command, resp)
+        await ctx.send("Bike konnte nicht gefunden werden.")
+    else:
+        await ctx.message.add_reaction("👍🏻")
+
+
+@tasks.loop(seconds=20)
 async def loop_check_bikes():
     """
     Task - Checks all bikes and send a message if a bike is available

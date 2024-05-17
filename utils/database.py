@@ -12,15 +12,10 @@ db_path = os.environ.get("DATABASE")
 con = sqlite3.connect(db_path)
 cur = con.cursor()
 
-############
-# REMINDER #
-###########
 
 ############
 # REMINDER #
 ###########
-
-
 def addreminder_db(topic, date, channel, sender):
     """
     Inserts a new row into reminder table
@@ -88,11 +83,10 @@ def delete_reminder(topic, date, channel, sender):
     except sqlite3.Error as e:
         return e  # return back to caller, logging is handled there
 
+
 ################
 # Canyon Bikes #
 ################
-
-
 def add_bike(name, variant, url, channel, sender):
     """
     Inserts a new row into bike table
@@ -125,13 +119,13 @@ def add_bike(name, variant, url, channel, sender):
 
 def fetch_bikes():
     """
-    Fetches all bikes from the database
+    Fetches all bikes from the database which are not muted
 
     Returns:
         array of bikes
     """
     try:
-        resp = cur.execute("SELECT * FROM bike;")
+        resp = cur.execute("SELECT * FROM bike where muted=false;")
         bikes = resp.fetchall()
         return bikes
     except sqlite3.Error as e:
@@ -153,6 +147,58 @@ def delete_bike(name, variant, channel, sender):
     try:
         cur.execute(
             f"DELETE FROM bike WHERE"
+            f"(name = '{name}')"
+            f"AND (variant = '{variant}')"
+            f"AND (channel_id = {channel})"
+            f"AND (sender = {sender});"
+        )
+        con.commit()
+        return True
+    except sqlite3.Error as e:
+        return e  # return back to caller, logging is handled there
+
+
+def mute_bike(name, variant, channel, sender):
+    """
+    Sets mute column to true for given bike
+    Parameters:
+    name: name of the bike which should be deleted
+    variant: variant of the bike
+    channel: channel reminder was posted in
+    sender: user who added the bike
+
+    Returns:
+        True or sqlite Error
+    """
+    try:
+        cur.execute(
+            f"UPDATE bike set muted=true WHERE"
+            f"(name = '{name}')"
+            f"AND (variant = '{variant}')"
+            f"AND (channel_id = {channel})"
+            f"AND (sender = {sender});"
+        )
+        con.commit()
+        return True
+    except sqlite3.Error as e:
+        return e  # return back to caller, logging is handled there
+
+
+def unmute_bike(name, variant, channel, sender):
+    """
+    Sets mute column to false for given bike
+    Parameters:
+    name: name of the bike which should be deleted
+    variant: variant of the bike
+    channel: channel reminder was posted in
+    sender: user who added the bike
+
+    Returns:
+        True or sqlite Error
+    """
+    try:
+        cur.execute(
+            f"UPDATE bike set muted=false WHERE"
             f"(name = '{name}')"
             f"AND (variant = '{variant}')"
             f"AND (channel_id = {channel})"

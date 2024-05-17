@@ -36,3 +36,10 @@ cur.execute(
     );
     """
 )
+
+cur.execute(
+    """
+    ALTER TABLE bike
+    ADD muted BOOL NOT NULL DEFAULT false;
+    """
+)
