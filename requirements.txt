@@ -12,7 +12,7 @@ multidict==6.0.5
 praw==7.7.1
 prawcore==2.4.0
 python-dotenv==1.0.1
-requests==2.31.0
+requests==2.32.2
 soupsieve==2.5
 typing_extensions==4.11.0
 update-checker==0.18.0
