@@ -44,7 +44,7 @@ async def on_ready():
     """
     logger.info("Bot ready as %s - ID: %s", bot.user, bot.user.id)
     loop_check_reminders.start()
-    loop_check_bikes.start()
+    # loop_check_bikes.start()
 
 
 ##########
