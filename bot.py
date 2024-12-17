@@ -15,6 +15,7 @@ from utils.reddit import get_post
 from utils.database import (
     addreminder_db, delete_bike, fetch_reminders,
     delete_reminder, add_bike, fetch_bikes, mute_bike, unmute_bike)
+from utils.stromberg import get_random_quote
 
 # env variables
 load_dotenv()
@@ -240,8 +241,6 @@ async def weathertm(ctx, location):
 #################
 # CANYON BIKES  #
 ################
-
-
 @bot.command()
 async def addbike(ctx, name, variant, url):
     """
@@ -364,6 +363,22 @@ async def loop_check_bikes():
                 title=embed_title, description=embed_desc, color=embed_color)
             await channel.send(embed=embed)
 
+#############
+# STROMBERG #
+#############
+@bot.command()
+async def stromberg(ctx):
+    """
+    User command - gets a random stromberg quote
+
+    Parameters
+        ctx: Context of the Command (User, Channel ...)
+
+    Returns:
+        nothing - posts in the channel the command was posted (success or error)
+    """
+    quote = get_random_quote()
+    await ctx.send(quote)
 
 # start the bot
 bot.run(bot_token, log_handler=handler)
