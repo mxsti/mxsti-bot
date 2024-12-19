@@ -2,7 +2,12 @@
 
 import os
 import yt_dlp
+from dotenv import load_dotenv
 from utils.exceptions import DownloadFailedError
+
+load_dotenv()
+
+YOUTUBE_COOKIEFILE = os.environ.get("YOUTUBE_COOKIEFILE")
 
 
 async def download_audio(url):
@@ -17,6 +22,7 @@ async def download_audio(url):
     """
     # options/config for download
     ydl_opts = {
+        'cookiefile': YOUTUBE_COOKIEFILE,
         'format': 'm4a/bestaudio/best',
         'postprocessors': [{  # Extract audio using ffmpeg (needs to be installed)
             'key': 'FFmpegExtractAudio',
