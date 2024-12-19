@@ -16,6 +16,7 @@ from utils.database import (
     addreminder_db, delete_bike, fetch_reminders,
     delete_reminder, add_bike, fetch_bikes, mute_bike, unmute_bike)
 from utils.stromberg import get_random_quote
+from utils.y2ubedownloader import download_audio
 
 # env variables
 load_dotenv()
@@ -379,6 +380,28 @@ async def stromberg(ctx):
     """
     quote = get_random_quote()
     await ctx.send(quote)
+
+################
+# AUDIO STREAM #
+################
+@bot.command()
+async def listen(ctx, url):
+    """
+    User command - plays YouTube video in given audio channel
+
+    Parameters
+        ctx: Context of the Command (User, Channel ...)
+        url: url of the video that should be played
+
+    Returns:
+        nothing - plays audio or sends a error message
+    """
+    video_info = await download_audio(url)
+    title = video_info[1]
+    id = video_info[0]
+    voice_channel = ctx.message.author.voice.channel
+    vc = await voice_channel.connect()
+    vc.play(discord.FFmpegPCMAudio(source=f"{os.getcwd()}/audio/{title} [{id}].m4a"))
 
 # start the bot
 bot.run(bot_token, log_handler=handler)

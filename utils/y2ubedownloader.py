@@ -1,11 +1,13 @@
-import json
+import os
 import yt_dlp
 
-URL = 'https://www.youtube.com/watch?v=zd9pOoICt34'
+async def download_audio(URL):
+    ydl_opts = {
+        'format' : 'm4a/bestaudio/best',
+        'paths': {'home' : f'{os.getcwd()}/audio'},
+        'writethumbnail': 'true',
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        video_info = ydl.extract_info(URL) # also downloads video/audio file
 
-ydl_opts = {
-    'format' : 'm4a/bestaudio/best',
-    'outtmpl': {'default' : 'test.m4a' }
-}
-with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-    ydl.download(URL)
+    return [video_info["id"], video_info["title"]]
