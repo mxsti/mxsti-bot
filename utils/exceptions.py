@@ -29,3 +29,16 @@ class WeatherAPIError(Exception):
         self.code = code
         self.message = f"{code}: {message}"
         super().__init__(self.message)
+
+
+class DownloadFailedError(Exception):
+    """ 
+    Custom Exception when downloading video from youtube went wrong
+
+    Attributes:
+        message: error message
+    """
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
