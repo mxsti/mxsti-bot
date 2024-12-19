@@ -3,12 +3,13 @@
 from datetime import datetime
 import os
 import logging
+import shutil
 import sqlite3
 import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 from utils.canyon_bikes import check_bike
-from utils.exceptions import WeatherAPIError, SubredditNotFoundOrEmptyError
+from utils.exceptions import WeatherAPIError, SubredditNotFoundOrEmptyError, DownloadFailedError
 from utils.weather_api import (
     parse_weather_data_by_location_today, parse_weather_data_by_location_tomorrow)
 from utils.reddit import get_post
@@ -46,6 +47,7 @@ async def on_ready():
     """
     logger.info("Bot ready as %s - ID: %s", bot.user, bot.user.id)
     loop_check_reminders.start()
+    loop_clear_audio.start()
     # loop_check_bikes.start()
 
 
@@ -181,7 +183,8 @@ async def weather(ctx, location):
     weather_code = weather_forecast[0].metadata.weather_code
     icon = discord.File(
         f"utils/weather_icons/{weather_code}.png", filename=f"{weather_code}.png")
-    embed_title = f"Wetter Vorhersage für {weather_forecast[0].metadata.location}"
+    embed_title = f"Wetter Vorhersage für {
+        weather_forecast[0].metadata.location}"
     embed_color = discord.Color.random()
     embed = discord.Embed(
         title=embed_title, color=embed_color)
@@ -364,6 +367,7 @@ async def loop_check_bikes():
                 title=embed_title, description=embed_desc, color=embed_color)
             await channel.send(embed=embed)
 
+
 #############
 # STROMBERG #
 #############
@@ -381,13 +385,14 @@ async def stromberg(ctx):
     quote = get_random_quote()
     await ctx.send(quote)
 
+
 ################
 # AUDIO STREAM #
 ################
 @bot.command()
 async def listen(ctx, url):
     """
-    User command - plays YouTube video in given audio channel
+    User command - play YouTube video in given audio channel
 
     Parameters
         ctx: Context of the Command (User, Channel ...)
@@ -396,12 +401,70 @@ async def listen(ctx, url):
     Returns:
         nothing - plays audio or sends a error message
     """
-    video_info = await download_audio(url)
-    title = video_info[1]
-    id = video_info[0]
-    voice_channel = ctx.message.author.voice.channel
-    vc = await voice_channel.connect()
-    vc.play(discord.FFmpegPCMAudio(source=f"{os.getcwd()}/audio/{title} [{id}].m4a"))
+    # get voice channel of sender
+    voice = ctx.message.author.voice
+    if voice is None:
+        await ctx.send('Du musst in einem Voice Channel sein!')
+        return
 
-# start the bot
+    # check if bot is already connected to voice channel and switch channels
+    for voice_client in bot.voice_clients:
+        await voice_client.disconnect()
+
+    await ctx.message.add_reaction('🎵')
+
+    # download audio
+    try:
+        video_info = await download_audio(url)  # also downloads audio
+    except DownloadFailedError as e:
+        logger.error("Command: listen - Error: %s",
+                     e.message)
+        await ctx.send("Etwas ist schiefgelaufen, ist die URL korrekt?")
+        return
+
+    title = video_info[1]
+    video_id = video_info[0]
+
+    vc = await voice.channel.connect()
+
+    # play audio
+    vc.play(discord.FFmpegPCMAudio(
+        source=f"{os.getcwd()}/audio/{title} [{video_id}].m4a"))
+
+
+@bot.command()
+async def stop(ctx):
+    """
+    User command - stops currently playing audio
+
+    Parameters
+        ctx: Context of the Command (User, Channel ...)
+
+    Returns:
+        nothing - stops audio
+    """
+    await ctx.message.add_reaction('👍🏻')
+    # normally should only be one be bot returns a list (idk)
+    for voice_client in bot.voice_clients:
+        voice_client.stop()
+
+
+@tasks.loop(minutes=10)
+async def loop_clear_audio():
+    """
+    Task - Clears audio folder to keep things clean and small
+    Runs every 10 minutes
+
+    Returns:
+        nothing - logs if ran
+    """
+    shutil.rmtree(
+        f"{os.getcwd()}/audio")  # currently playing audio file is not deleted
+    logger.info("Task: loop_clear_audio - INFO: %s",
+                "cleared audio folder")
+
+
+#########################################
+# START BOT (LAST LINE IN FILE PLS LOL) #
+########################################
 bot.run(bot_token, log_handler=handler)
