@@ -32,4 +32,4 @@ update-checker==0.18.0
 urllib3==2.3.0
 websocket-client==1.8.0
 yarl==1.18.3
-yt-dlp==2024.12.23
+yt-dlp==2025.1.12
