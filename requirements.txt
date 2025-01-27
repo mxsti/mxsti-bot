@@ -18,7 +18,7 @@ mccabe==0.7.0
 multidict==6.1.0
 platformdirs==4.3.6
 praw==7.8.1
-prawcore==2.4.0
+prawcore==3.0.1
 propcache==0.2.1
 pycparser==2.22
 pylint==3.3.2
