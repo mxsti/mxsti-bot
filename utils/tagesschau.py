@@ -28,6 +28,24 @@ class News:
     teaser_image_url: str = None
 
 
+def get_latest_tagesschau_channels():
+    """
+    Calls the tagesschau api and grabs the latest info for the tagesschau channels
+
+    Returns:
+        response JSON from the tagesschau api
+    """
+    url = 'https://www.tagesschau.de/api2u/channels/'
+    headers = {"accept": "application/json"} # pylint: disable=duplicate-code
+    response = requests.get(url, headers=headers, timeout=4)
+    response_json = response.json()
+
+    if response.status_code == 200:
+        return response_json
+
+    raise TagesschauAPIError(response_json["error"], response.status_code)
+
+
 def get_news(ressort: Ressort):
     """
     Calls the tagesschau api and grabs the latest news for given ressort
@@ -40,7 +58,7 @@ def get_news(ressort: Ressort):
     """
     # 4 is the region - defaulting to brandenburg
     url = f'https://www.tagesschau.de/api2u/news/?regions=4&ressort={ressort.value}'
-    headers = {"accept": "application/json"} # pylint: disable=duplicate-code
+    headers = {"accept": "application/json"}  # pylint: disable=duplicate-code
     response = requests.get(url, headers=headers, timeout=4)
     response_json = response.json()
 
@@ -60,9 +78,10 @@ def parse_news_data_by_ressort(ressort: Ressort):
     Returns:
         array - array containing news objects with the latest news for the given ressort
     """
+
     def create_news_object(news_data):
         title = news_data["title"]
-        teaser_image_url =  news_data["teaserImage"]["imageVariants"]["1x1-144"]
+        teaser_image_url = news_data["teaserImage"]["imageVariants"]["1x1-144"]
         details_web = news_data["detailsweb"]
         breaking_news = news_data["breakingNews"]
         return News(
@@ -82,3 +101,23 @@ def parse_news_data_by_ressort(ressort: Ressort):
         parsed_news.append(create_news_object(n))
 
     return parsed_news
+
+
+def get_tagesschau_video_url():
+    """
+    Parses the response json from the tagesschau api and retrieves the video url
+
+    Returns:
+        str - video url of the latest tagesschau
+    """
+    try:
+        data = get_latest_tagesschau_channels()
+    except TagesschauAPIError as e:
+        return e
+
+    channels = data["channels"]
+    tagesschau = [channel for channel in channels
+                  if channel["title"] == "tagesschau"
+                  and "T20:00:00.000+01:00" in channel["date"]][0]
+
+    return tagesschau["streams"]["h264xl"]
