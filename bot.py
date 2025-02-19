@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from utils.canyon_bikes import check_bike
 from utils.exceptions import (
     WeatherAPIError, SubredditNotFoundOrEmptyError, DownloadFailedError, TagesschauAPIError)
-from utils.tagesschau import Ressort, parse_news_data_by_ressort, News
+from utils.tagesschau import Ressort, parse_news_data_by_ressort, News, get_tagesschau_video_url
 from utils.weather_api import (
     parse_weather_data_by_location_today, parse_weather_data_by_location_tomorrow)
 from utils.reddit import get_post
@@ -513,6 +513,28 @@ async def news_error(ctx, error):
         await (ctx.send(
             'Etwas ist schiefgelaufen, hast du das richtige Ressort angegeben?'
             ' (Sport, Wissen, Inland, Ausland, Investigativ, Wirtschaft, Video)'))
+
+
+@bot.command()
+async def tagesschau(ctx):
+    """
+    User command - gets the latest tagesschau video (20:00 Version)
+
+    Parameters
+        ctx: Context of the Command (User, Channel ...)
+
+    Returns:
+        nothing - posts in the channel the command was posted (success or error)
+    """
+    video_url = get_tagesschau_video_url()
+    if isinstance(video_url, TagesschauAPIError):
+        logger.error("User: %s - Command: %s - Error: %s",
+                     ctx.author, ctx.command, video_url)
+        await ctx.send("Etwas ist schiefgelaufen :(")
+        return
+
+    await ctx.message.add_reaction('📰')
+    await ctx.send(video_url)
 
 #########################################
 # START BOT (LAST LINE IN FILE PLS LOL) #
