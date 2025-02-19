@@ -1,10 +1,8 @@
 """ helper functions to interact with tagesschau api """
+
 from dataclasses import dataclass
-
-import requests
-
 from enum import Enum
-
+import requests
 from utils.exceptions import TagesschauAPIError
 
 
@@ -25,9 +23,9 @@ class News:
     Class containing news metadata
     """
     title: str = None
-    detailsWeb: str = None
-    breakingNews: bool = None
-    teaserImageUrl: str = None
+    details_web: str = None
+    breaking_news: bool = None
+    teaser_image_url: str = None
 
 
 def get_news(ressort: Ressort):
@@ -42,7 +40,7 @@ def get_news(ressort: Ressort):
     """
     # 4 is the region - defaulting to brandenburg
     url = f'https://www.tagesschau.de/api2u/news/?regions=4&ressort={ressort.value}'
-    headers = {"accept": "application/json"}
+    headers = {"accept": "application/json"} # pylint: disable=duplicate-code
     response = requests.get(url, headers=headers, timeout=4)
     response_json = response.json()
 
@@ -67,7 +65,11 @@ def parse_news_data_by_ressort(ressort: Ressort):
         teaser_image_url =  news_data["teaserImage"]["imageVariants"]["1x1-144"]
         details_web = news_data["detailsweb"]
         breaking_news = news_data["breakingNews"]
-        return News(title=title, teaserImageUrl=teaser_image_url, detailsWeb=details_web, breakingNews=breaking_news)
+        return News(
+            title=title,
+            teaser_image_url=teaser_image_url,
+            details_web=details_web,
+            breaking_news=breaking_news)
 
     try:
         data = get_news(ressort)

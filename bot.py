@@ -491,10 +491,10 @@ async def news(ctx, ressort: str):
     for n in current_news:
         embed_title = n.title
         embed_color = discord.Color.random()
-        embed_desc = n.detailsWeb
+        embed_desc = n.details_web
         embed = discord.Embed(
             title=embed_title, color=embed_color, description=embed_desc)
-        embed.set_thumbnail(url=n.teaserImageUrl)
+        embed.set_thumbnail(url=n.teaser_image_url)
         await ctx.send(embed=embed)
 
     return
