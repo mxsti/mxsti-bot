@@ -35,7 +35,7 @@ class WeatherToday():
 
 
 @dataclass
-class WeatherTomorrow():
+class WeatherTomorrow:
     """
     Class containing tomorrows weather information
     """
