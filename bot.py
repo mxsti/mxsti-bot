@@ -9,7 +9,9 @@ import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 from utils.canyon_bikes import check_bike
-from utils.exceptions import WeatherAPIError, SubredditNotFoundOrEmptyError, DownloadFailedError
+from utils.exceptions import (
+    WeatherAPIError, SubredditNotFoundOrEmptyError, DownloadFailedError, TagesschauAPIError)
+from utils.tagesschau import Ressort, parse_news_data_by_ressort, News
 from utils.weather_api import (
     parse_weather_data_by_location_today, parse_weather_data_by_location_tomorrow)
 from utils.reddit import get_post
@@ -463,6 +465,54 @@ async def loop_clear_audio():
     logger.info("Task: loop_clear_audio - INFO: %s",
                 "cleared audio folder")
 
+
+##############
+# TAGESSCHAU #
+##############
+@bot.command()
+async def news(ctx, ressort: str):
+    """
+    User command - gets the latest news from the given ressort
+
+    Parameters
+        ctx: Context of the Command (User, Channel ...)
+        ressort: ressort of the news
+
+    Returns:
+        nothing - posts in the channel the command was posted (success or error)
+    """
+    current_news: [News] = parse_news_data_by_ressort(Ressort(ressort.lower()))
+    if isinstance(current_news, TagesschauAPIError):
+        logger.error("User: %s - Command: %s - Error: %s",
+                     ctx.author, ctx.command, current_news)
+        await ctx.send("Etwas ist schiefgelaufen :(")
+        return
+
+    for n in current_news:
+        embed_title = n.title
+        embed_color = discord.Color.random()
+        embed_desc = n.details_web
+        embed = discord.Embed(
+            title=embed_title, color=embed_color, description=embed_desc)
+        embed.set_thumbnail(url=n.teaser_image_url)
+        await ctx.send(embed=embed)
+
+    return
+
+@news.error
+async def news_error(ctx, error):
+    """
+    Error handler for news command
+    """
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send(
+            'Bitte gib einen Ressort an! '
+            '(Sport, Wissen, Inland, Ausland, Investigativ, Wirtschaft, Video)')
+
+    if isinstance(error, commands.CommandInvokeError):
+        await (ctx.send(
+            'Etwas ist schiefgelaufen, hast du das richtige Ressort angegeben?'
+            ' (Sport, Wissen, Inland, Ausland, Investigativ, Wirtschaft, Video)'))
 
 #########################################
 # START BOT (LAST LINE IN FILE PLS LOL) #
