@@ -3,7 +3,7 @@
 import os
 import yt_dlp
 from dotenv import load_dotenv
-from utils.exceptions import DownloadFailedError
+from utils.youtubedl.y2ubedownloader_exception import DownloadFailedError
 
 load_dotenv()
 

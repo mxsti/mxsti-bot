@@ -8,18 +8,20 @@ import sqlite3
 import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
-from utils.canyon_bikes import check_bike
-from utils.exceptions import (
-    WeatherAPIError, SubredditNotFoundOrEmptyError, DownloadFailedError, TagesschauAPIError)
-from utils.tagesschau import Ressort, parse_news_data_by_ressort, News, get_tagesschau_video_url
-from utils.weather_api import (
+from utils.bikes.bike_helper import check_bike
+from utils.news.tagesschau_helper import (
+    Ressort, parse_news_data_by_ressort, News, get_tagesschau_video_url)
+from utils.news.news_exception import TagesschauAPIError
+from utils.weather.weather_api_helper import (
     parse_weather_data_by_location_today, parse_weather_data_by_location_tomorrow)
-from utils.reddit import get_post
-from utils.database import (
-    addreminder_db, delete_bike, fetch_reminders,
-    delete_reminder, add_bike, fetch_bikes, mute_bike, unmute_bike)
-from utils.stromberg import get_random_quote
-from utils.y2ubedownloader import download_audio
+from utils.weather.weather_exception import WeatherAPIError
+from utils.reddit.reddit_helper import get_post
+from utils.reddit.reddit_exception import SubredditNotFoundOrEmptyError
+from utils.reminder.reminder_database import addreminder_db, fetch_reminders, delete_reminder
+from utils.bikes.bike_database import delete_bike, add_bike, fetch_bikes, mute_bike, unmute_bike
+from utils.stromberg.stromberg_helper import get_random_quote
+from utils.youtubedl.y2ubedownload_helper import download_audio
+from utils.youtubedl.y2ubedownloader_exception import DownloadFailedError
 
 # env variables
 load_dotenv()
@@ -184,7 +186,7 @@ async def weather(ctx, location):
     # build the embed
     weather_code = weather_forecast[0].metadata.weather_code
     icon = discord.File(
-        f"utils/weather_icons/{weather_code}.png", filename=f"{weather_code}.png")
+        f"utils/weather/weather_icons/{weather_code}.png", filename=f"{weather_code}.png")
     embed_title = f"Wetter Vorhersage für {
         weather_forecast[0].metadata.location}"
     embed_color = discord.Color.random()
@@ -411,7 +413,7 @@ async def listen(ctx, url):
 
     # check if bot is already connected to voice channel and switch channels
     for voice_client in bot.voice_clients:
-        await voice_client.disconnect()
+        await voice_client.disconnect(force=True)
 
     await ctx.message.add_reaction('🎵')
 
@@ -448,7 +450,7 @@ async def stop(ctx):
     await ctx.message.add_reaction('👍🏻')
     # normally should only be one be bot returns a list (idk)
     for voice_client in bot.voice_clients:
-        voice_client.stop()
+        await voice_client.disconnect(force=True) # disconnect because stop doesnt work anymore
 
 
 @tasks.loop(minutes=10)

@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from enum import Enum
 import requests
-from utils.exceptions import TagesschauAPIError
+from utils.news.news_exception import TagesschauAPIError
 
 
 class Ressort(Enum):

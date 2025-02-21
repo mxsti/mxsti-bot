@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import urllib.parse
 import requests
 from dotenv import load_dotenv
-from utils.exceptions import WeatherAPIError
+from utils.weather.weather_exception import WeatherAPIError
 
 load_dotenv()
 
