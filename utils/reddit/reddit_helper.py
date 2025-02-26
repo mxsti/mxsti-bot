@@ -5,7 +5,7 @@ import random
 import praw
 from praw.models import Subreddit
 from dotenv import load_dotenv
-from utils.exceptions import SubredditNotFoundOrEmptyError
+from utils.reddit.reddit_exception import SubredditNotFoundOrEmptyError
 
 load_dotenv()
 
@@ -28,7 +28,7 @@ def get_post(subredditname):
         subredditname: Name of the subreddit
 
     Returns:
-        post url: the URL of a random post    
+        post url: the URL of a random post
     """
     subreddit: Subreddit = reddit.subreddit(subredditname)
     posts = []
