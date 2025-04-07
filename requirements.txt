@@ -31,5 +31,5 @@ typing_extensions==4.12.2
 update-checker==0.18.0
 urllib3==2.3.0
 websocket-client==1.8.0
-yarl==1.18.3
+yarl==1.19.0
 yt-dlp==2025.2.19
