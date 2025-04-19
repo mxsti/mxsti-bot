@@ -10,7 +10,8 @@ from discord.ext import commands, tasks
 from dotenv import load_dotenv
 from utils.canyon_bikes import check_bike
 from utils.exceptions import (
-    WeatherAPIError, SubredditNotFoundOrEmptyError, DownloadFailedError, TagesschauAPIError)
+    APIError, SubredditNotFoundOrEmptyError, DownloadFailedError)
+from utils.fuel_api import Station, get_station_prices_by_address
 from utils.tagesschau import Ressort, parse_news_data_by_ressort, News, get_tagesschau_video_url
 from utils.weather_api import (
     parse_weather_data_by_location_today, parse_weather_data_by_location_tomorrow)
@@ -175,7 +176,7 @@ async def weather(ctx, location):
 
     # get the weather objects
     weather_forecast = parse_weather_data_by_location_today(location)
-    if isinstance(weather_forecast, WeatherAPIError):
+    if isinstance(weather_forecast, APIError):
         logger.error("User: %s - Command: %s - Error: %s",
                      ctx.author, ctx.command, weather_forecast)
         await ctx.send(f"Ort {location} nicht gefunden")
@@ -186,7 +187,7 @@ async def weather(ctx, location):
     icon = discord.File(
         f"utils/weather_icons/{weather_code}.png", filename=f"{weather_code}.png")
     embed_title = f"Wetter Vorhersage für {
-        weather_forecast[0].metadata.location}"
+    weather_forecast[0].metadata.location}"
     embed_color = discord.Color.random()
     embed = discord.Embed(
         title=embed_title, color=embed_color)
@@ -217,7 +218,7 @@ async def weathertm(ctx, location):
 
     # get the weather objects
     weather_forecast = parse_weather_data_by_location_tomorrow(location)
-    if isinstance(weather_forecast, WeatherAPIError):
+    if isinstance(weather_forecast, APIError):
         logger.error("User: %s - Command: %s - Error: %s",
                      ctx.author, ctx.command, weather_forecast)
         await ctx.send(f"Ort {location} nicht gefunden")
@@ -482,7 +483,7 @@ async def news(ctx, ressort: str):
         nothing - posts in the channel the command was posted (success or error)
     """
     current_news: [News] = parse_news_data_by_ressort(Ressort(ressort.lower()))
-    if isinstance(current_news, TagesschauAPIError):
+    if isinstance(current_news, APIError):
         logger.error("User: %s - Command: %s - Error: %s",
                      ctx.author, ctx.command, current_news)
         await ctx.send("Etwas ist schiefgelaufen :(")
@@ -498,6 +499,7 @@ async def news(ctx, ressort: str):
         await ctx.send(embed=embed)
 
     return
+
 
 @news.error
 async def news_error(ctx, error):
@@ -527,7 +529,7 @@ async def tagesschau(ctx):
         nothing - posts in the channel the command was posted (success or error)
     """
     video_url = get_tagesschau_video_url()
-    if isinstance(video_url, TagesschauAPIError):
+    if isinstance(video_url, APIError):
         logger.error("User: %s - Command: %s - Error: %s",
                      ctx.author, ctx.command, video_url)
         await ctx.send("Etwas ist schiefgelaufen :(")
@@ -535,6 +537,45 @@ async def tagesschau(ctx):
 
     await ctx.message.add_reaction('📰')
     await ctx.send(video_url)
+
+
+#########
+# FUEL #
+########
+@bot.command()
+async def tanken(ctx, address: str):
+    """
+    User command - gets the latest fuel prices for given address
+
+    Parameters
+        ctx: Context of the Command (User, Channel ...)
+        address: address where the prices should be checked
+
+    Returns:
+        nothing - posts in the channel the command was posted (success or error)
+    """
+
+    stations: [Station] = get_station_prices_by_address(address)
+    if isinstance(stations, APIError):  # pylint: disable=duplicate-code
+        logger.error("User: %s - Command: %s - Error: %s",
+                     ctx.author, ctx.command, stations)
+        await ctx.send("Etwas ist schiefgelaufen :(")
+        return
+
+    embed_title = f"Preisübersicht für {address}"
+    embed_color = discord.Color.random()
+    embed = discord.Embed(
+        title=embed_title, color=embed_color)
+
+    for station in stations:
+        embed.add_field(
+            name=f"{station.brand} - {station.name}",
+            value=f"""
+                {round(station.diesel, 2)}€ Diesel
+                {round(station.e5, 2)}€ E5
+                {round(station.e10, 2)}€ E10""")
+    await ctx.send(embed=embed)
+
 
 #########################################
 # START BOT (LAST LINE IN FILE PLS LOL) #
