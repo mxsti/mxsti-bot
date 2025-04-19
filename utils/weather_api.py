@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import urllib.parse
 import requests
 from dotenv import load_dotenv
-from utils.exceptions import WeatherAPIError
+from utils.exceptions import APIError
 
 load_dotenv()
 
@@ -67,7 +67,7 @@ def grab_forecast_by_city(location):
     if response.status_code == 200:
         return response_json
 
-    raise WeatherAPIError(response_json["message"], response.status_code)
+    raise APIError(response_json["message"], response.status_code)
 
 
 def parse_weather_data_by_location_today(location_input):
@@ -82,7 +82,7 @@ def parse_weather_data_by_location_today(location_input):
     """
     try:
         data = grab_forecast_by_city(location_input)
-    except WeatherAPIError as e:
+    except APIError as e:
         return e
 
     hourly = data["timelines"]["hourly"]
@@ -127,7 +127,7 @@ def parse_weather_data_by_location_tomorrow(location_input):
     """
     try:
         data = grab_forecast_by_city(location_input)
-    except WeatherAPIError as e:
+    except APIError as e:
         return e
 
     daily = data["timelines"]["daily"]

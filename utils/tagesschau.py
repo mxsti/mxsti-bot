@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from enum import Enum
 import requests
-from utils.exceptions import TagesschauAPIError
+from utils.exceptions import APIError
 
 
 class Ressort(Enum):
@@ -43,7 +43,7 @@ def get_latest_tagesschau_channels():
     if response.status_code == 200:
         return response_json
 
-    raise TagesschauAPIError(response_json["error"], response.status_code)
+    raise APIError(response_json["error"], response.status_code)
 
 
 def get_news(ressort: Ressort):
@@ -65,7 +65,7 @@ def get_news(ressort: Ressort):
     if response.status_code == 200:
         return response_json
 
-    raise TagesschauAPIError(response_json["error"], response.status_code)
+    raise APIError(response_json["error"], response.status_code)
 
 
 def parse_news_data_by_ressort(ressort: Ressort):
@@ -92,7 +92,7 @@ def parse_news_data_by_ressort(ressort: Ressort):
 
     try:
         data = get_news(ressort)
-    except TagesschauAPIError as e:
+    except APIError as e:
         return e
 
     news = data["news"][:3]  # we only want the newest news
@@ -112,7 +112,7 @@ def get_tagesschau_video_url():
     """
     try:
         data = get_latest_tagesschau_channels()
-    except TagesschauAPIError as e:
+    except APIError as e:
         return e
 
     channels = data["channels"]
