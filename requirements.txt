@@ -11,7 +11,7 @@ cffi==1.17.1
 charset-normalizer==3.4.1
 dill==0.4.0
 discord.py==2.5.2
-frozenlist==1.5.0
+frozenlist==1.6.0
 idna==3.10
 isort==6.0.1
 mccabe==0.7.0
